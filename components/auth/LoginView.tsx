@@ -22,7 +22,7 @@ export function LoginView() {
             <Gamepad2 className="w-12 h-12 text-primary" />
           </div>
           <h1 className="text-4xl font-black tracking-tight text-white italic">
-            CAN I <span className="text-primary italic">RUN</span> IT?
+            FPS <span className="text-primary italic">TEST</span> PERFORMANCE
           </h1>
           <p className="text-muted-foreground text-lg">
             Professional Hardware Analysis & Benchmarking
