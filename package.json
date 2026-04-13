@@ -12,9 +12,9 @@
     "start": "next start",
     "lint": "eslint .",
     "electron:dev": "concurrently \"pnpm dev\" \"wait-on http://localhost:3000 && electron .\"",
-    "electron:build": "cross-env ELECTRON_BUILD=true next build && electron-builder",
-    "electron:pack": "cross-env ELECTRON_BUILD=true electron-builder --dir",
-    "electron:dist": "cross-env ELECTRON_BUILD=true electron-builder"
+    "electron:build": "set ELECTRON_BUILD=true && next build && electron-builder",
+    "electron:pack": "set ELECTRON_BUILD=true && electron-builder --dir",
+    "electron:dist": "set ELECTRON_BUILD=true && electron-builder"
   },
   "build": {
     "appId": "com.fpstest.app",

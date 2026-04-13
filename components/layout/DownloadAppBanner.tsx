@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 export function DownloadAppBanner() {
   const handleDownload = () => {
     // This will be replaced by the actual Vercel/GitHub download link
-    window.location.href = '/downloads/FPSTest-Setup.exe';
+    window.location.href = 'https://github.com/JasurSadiev/FPS-Test/releases/download/v1.0.0/FPSTest-Setup.exe';
   };
 
   return (

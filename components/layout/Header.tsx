@@ -64,7 +64,7 @@ export function Header({ title, onMenuClick, isElectron, onRefresh }: HeaderProp
             variant="default" 
             size="sm" 
             className="hidden sm:flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
-            onClick={() => window.location.href = '/downloads/CanIRunIt-Setup.exe'}
+            onClick={() => window.location.href = 'https://github.com/JasurSadiev/FPS-Test/releases/download/v1.0.0/FPSTest-Setup.exe'}
           >
             <Download className="w-4 h-4" />
             Download App
