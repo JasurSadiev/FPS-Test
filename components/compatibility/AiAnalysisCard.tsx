@@ -31,22 +31,29 @@ export function AiAnalysisCard({ systemInfo, game, compatibility }: AiAnalysisCa
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/ai/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          systemInfo,
-          game,
-          verdict: compatibility.verdict,
-          fps: compatibility.fps,
-        }),
-      });
+      let result;
+      const payload = {
+        systemInfo,
+        game,
+        verdict: compatibility.verdict,
+        fps: compatibility.fps,
+      };
 
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'Failed to analyze');
+      if (typeof window !== 'undefined' && (window as any).electronAPI?.isElectron) {
+        result = await (window as any).electronAPI.aiAnalyze(payload);
+      } else {
+        const response = await fetch('/api/ai/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Failed to analyze');
+      }
       
       setData(result);
     } catch (err: any) {
+
       console.error(err);
       setError(err.message);
     } finally {

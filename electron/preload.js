@@ -14,6 +14,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Get GPU usage (temperature, utilization)
   getGpuUsage: () => ipcRenderer.invoke('get-gpu-usage'),
   
+  // API Migrations
+  steamSearch: (query) => ipcRenderer.invoke('steam-search', query),
+  steamDetails: (appId) => ipcRenderer.invoke('steam-details', appId),
+  aiAnalyze: (data) => ipcRenderer.invoke('ai-analyze', data),
+  
   // Check if running in Electron
   isElectron: true,
   

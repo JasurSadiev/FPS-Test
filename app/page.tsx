@@ -33,18 +33,39 @@ export default function Home() {
   const [library, setLibrary] = useState<Game[]>([]); 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isLibraryLoading, setIsLibraryLoading] = useState(true);
+  const [isProfileLoading, setIsProfileLoading] = useState(true);
 
-  const { systemInfo, isLoading: sysLoading, isElectron, refresh } = useSystemInfo();
+  const { systemInfo, setSystemInfo, isLoading: sysDetecting, isElectron, detect } = useSystemInfo();
 
-  // Fetch library from Firestore on auth
+  // Fetch library and saved hardware profile on auth
   useEffect(() => {
     if (user) {
       setIsLibraryLoading(true);
-      userService.getLibrary(user.uid)
-        .then(setLibrary)
-        .finally(() => setIsLibraryLoading(false));
+      setIsProfileLoading(true);
+
+      const loadUserData = async () => {
+        try {
+          // Fetch library and saved hardware profile in parallel
+          const [libData, savedProfile] = await Promise.all([
+            userService.getLibrary(user.uid),
+            userService.getSavedSystemInfo(user.uid)
+          ]);
+          
+          setLibrary(libData);
+          if (savedProfile) {
+            setSystemInfo(savedProfile);
+          }
+        } catch (err) {
+          console.error("Failed to load user data:", err);
+        } finally {
+          setIsLibraryLoading(false);
+          setIsProfileLoading(false);
+        }
+      };
+
+      loadUserData();
     }
-  }, [user]);
+  }, [user, setSystemInfo]);
 
   const handleAddGame = useCallback((gameData: Omit<Game, 'id'>) => {
     const newGame: Game = {
@@ -82,10 +103,35 @@ export default function Home() {
     }
   }, [games, library, user]);
 
-  if (authLoading) {
+  const handleDetectHardware = useCallback(async () => {
+    if (!user) return;
+    try {
+      const info = await detect();
+      await userService.syncSystemInfo(user, info);
+      toast.success("Hardware profile saved to cloud");
+    } catch (err) {
+      toast.error("Hardware detection failed");
+    }
+  }, [detect, user]);
+
+  const handleManualSave = useCallback(async (info: SystemInfo) => {
+    if (!user) return;
+    try {
+      setSystemInfo(info);
+      await userService.syncSystemInfo(user, info);
+      toast.success("Manual hardware profile saved to cloud");
+    } catch (err) {
+      toast.error("Failed to save profile");
+    }
+  }, [user, setSystemInfo]);
+
+  if (authLoading || (user && isProfileLoading)) {
     return (
       <div className="h-screen bg-[#0a0a0f] flex items-center justify-center">
-        <Spinner size="lg" />
+        <div className="text-center space-y-4">
+          <Spinner className="w-12 h-12 text-indigo-500 mx-auto" />
+          {user && <p className="text-sm text-muted-foreground animate-pulse">Checking cloud profile...</p>}
+        </div>
       </div>
     );
   }
@@ -95,13 +141,13 @@ export default function Home() {
   }
 
   const renderView = () => {
-    if (sysLoading || !systemInfo) {
+    if (sysDetecting) {
       return (
         <div className="flex items-center justify-center h-full">
           <div className="text-center space-y-4">
-            <Spinner size="lg" />
+            <Spinner className="w-12 h-12 text-indigo-500 mx-auto" />
             <p className="text-muted-foreground">
-              {isElectron ? 'Detecting your hardware...' : 'Loading system information...'}
+              {isElectron ? 'Scanning your hardware (this may take a minute)...' : 'Loading system information...'}
             </p>
           </div>
         </div>
@@ -116,6 +162,8 @@ export default function Home() {
             games={games} 
             library={library}
             onToggleLibrary={handleToggleLibrary}
+            onDetectHardware={handleDetectHardware}
+            onManualSave={handleManualSave}
             isElectron={isElectron}
           />
         );
@@ -173,7 +221,7 @@ export default function Home() {
           title={viewTitles[currentView]} 
           onMenuClick={() => setSidebarOpen(true)}
           isElectron={isElectron}
-          onRefresh={refresh}
+          onRefresh={undefined}
         />
         <main className="flex-1 overflow-auto p-6 scrollbar-hide">
           {renderView()}

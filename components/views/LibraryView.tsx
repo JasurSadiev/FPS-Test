@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Cpu, MonitorPlay, MemoryStick, HardDrive, ArrowLeft, Library, Plus } from 'lucide-react';
 
 interface LibraryViewProps {
-  systemInfo: SystemInfo;
+  systemInfo: SystemInfo | null;
   library: Game[];
   allGames: Game[];
   onAddToLibrary: (gameId: number) => void;
@@ -31,14 +31,14 @@ export function LibraryView({
   const libraryWithCompatibility = useMemo(() => {
     return library.map(game => ({
       game,
-      compatibility: checkCompatibility(systemInfo, game)
+      compatibility: systemInfo ? checkCompatibility(systemInfo, game) : null
     }));
   }, [library, systemInfo]);
 
   const filteredLibrary = useMemo(() => {
     if (filterVerdict === 'all') return libraryWithCompatibility;
     return libraryWithCompatibility.filter(
-      item => item.compatibility.verdict === filterVerdict
+      item => item.compatibility?.verdict === filterVerdict
     );
   }, [libraryWithCompatibility, filterVerdict]);
 
@@ -48,7 +48,7 @@ export function LibraryView({
   }, [library, allGames]);
 
   const compatibility = useMemo(() => {
-    if (!selectedGame) return null;
+    if (!selectedGame || !systemInfo) return null;
     return checkCompatibility(systemInfo, selectedGame);
   }, [selectedGame, systemInfo]);
 
@@ -60,8 +60,8 @@ export function LibraryView({
       recommended: 0,
       exceeds: 0,
     };
-    
     libraryWithCompatibility.forEach(({ compatibility }) => {
+      if (!compatibility) return;
       switch (compatibility.verdict) {
         case 'cannot-run': counts.cannotRun++; break;
         case 'minimum': counts.minimum++; break;
@@ -73,7 +73,7 @@ export function LibraryView({
     return counts;
   }, [libraryWithCompatibility]);
 
-  if (selectedGame && compatibility) {
+  if (selectedGame) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -99,7 +99,7 @@ export function LibraryView({
 
         <GameCard 
           game={selectedGame} 
-          compatibility={compatibility} 
+          compatibility={compatibility || undefined} 
           variant="full" 
           isInLibrary={true}
           onLibraryToggle={() => {
@@ -108,33 +108,45 @@ export function LibraryView({
           }}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ComponentComparison
-            label="CPU"
-            icon={<Cpu className="w-5 h-5" />}
-            score={compatibility.components.cpu}
-          />
-          <ComponentComparison
-            label="GPU"
-            icon={<MonitorPlay className="w-5 h-5" />}
-            score={compatibility.components.gpu}
-          />
-          <ComponentComparison
-            label="RAM"
-            icon={<MemoryStick className="w-5 h-5" />}
-            score={compatibility.components.ram}
-          />
-          <ComponentComparison
-            label="Storage"
-            icon={<HardDrive className="w-5 h-5" />}
-            score={compatibility.components.storage}
-          />
-        </div>
+        {compatibility ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ComponentComparison
+                label="CPU"
+                icon={<Cpu className="w-5 h-5" />}
+                score={compatibility.components.cpu}
+              />
+              <ComponentComparison
+                label="GPU"
+                icon={<MonitorPlay className="w-5 h-5" />}
+                score={compatibility.components.gpu}
+              />
+              <ComponentComparison
+                label="RAM"
+                icon={<MemoryStick className="w-5 h-5" />}
+                score={compatibility.components.ram}
+              />
+              <ComponentComparison
+                label="Storage"
+                icon={<HardDrive className="w-5 h-5" />}
+                score={compatibility.components.storage}
+              />
+            </div>
 
-        <BottleneckCard 
-          bottleneck={compatibility.bottleneck} 
-          suggestions={compatibility.suggestions} 
-        />
+            <BottleneckCard 
+              bottleneck={compatibility.bottleneck} 
+              suggestions={compatibility.suggestions} 
+            />
+          </>
+        ) : (
+          <div className="glass-card p-10 text-center rounded-xl bg-amber-500/5 border border-amber-500/20">
+            <MonitorPlay className="w-12 h-12 text-amber-500/50 mx-auto mb-4" />
+            <h3 className="text-xl font-bold uppercase italic text-amber-500 mb-2">Hardware Setup Required</h3>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              Please enter your system specifications on the Dashboard to unlock customized FPS estimates and compatibility grading.
+            </p>
+          </div>
+        )}
       </div>
     );
   }
@@ -206,7 +218,7 @@ export function LibraryView({
             <GameCard
               key={game.id}
               game={game}
-              compatibility={compatibility}
+              compatibility={compatibility || undefined}
               onClick={() => setSelectedGame(game)}
               isInLibrary={true}
               onLibraryToggle={() => onRemoveFromLibrary(game.id)}

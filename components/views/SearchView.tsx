@@ -14,7 +14,7 @@ import { Search, Cpu, MonitorPlay, MemoryStick, HardDrive, ArrowLeft, Loader2 } 
 import { Button } from '@/components/ui/button';
 
 interface SearchViewProps {
-  systemInfo: SystemInfo;
+  systemInfo: SystemInfo | null;
   games: Game[];
   library: Game[];
   onAddGame: (game: Omit<Game, 'id'>) => void;
@@ -77,11 +77,11 @@ export function SearchView({ systemInfo, games, library, onAddGame, onToggleLibr
   };
 
   const compatibility = useMemo(() => {
-    if (!selectedGame) return null;
+    if (!selectedGame || !systemInfo) return null;
     return checkCompatibility(systemInfo, selectedGame);
   }, [selectedGame, systemInfo]);
 
-  if (selectedGame && compatibility) {
+  if (selectedGame) {
     return (
       <div className="space-y-6">
         <Button 
@@ -101,41 +101,53 @@ export function SearchView({ systemInfo, games, library, onAddGame, onToggleLibr
           onLibraryToggle={() => onToggleLibrary(selectedGame.id)}
         />
         
-        <AiAnalysisCard 
-          systemInfo={systemInfo} 
-          game={selectedGame} 
-          compatibility={compatibility} 
-        />
+        {compatibility ? (
+          <>
+            <AiAnalysisCard 
+              systemInfo={systemInfo!} 
+              game={selectedGame} 
+              compatibility={compatibility} 
+            />
 
-        <FpsPredictionCard fps={compatibility.fps} />
+            <FpsPredictionCard fps={compatibility.fps} />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ComponentComparison
-            label="CPU"
-            icon={<Cpu className="w-5 h-5" />}
-            score={compatibility.components.cpu}
-          />
-          <ComponentComparison
-            label="GPU"
-            icon={<MonitorPlay className="w-5 h-5" />}
-            score={compatibility.components.gpu}
-          />
-          <ComponentComparison
-            label="RAM"
-            icon={<MemoryStick className="w-5 h-5" />}
-            score={compatibility.components.ram}
-          />
-          <ComponentComparison
-            label="Storage"
-            icon={<HardDrive className="w-5 h-5" />}
-            score={compatibility.components.storage}
-          />
-        </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ComponentComparison
+                label="CPU"
+                icon={<Cpu className="w-5 h-5" />}
+                score={compatibility.components.cpu}
+              />
+              <ComponentComparison
+                label="GPU"
+                icon={<MonitorPlay className="w-5 h-5" />}
+                score={compatibility.components.gpu}
+              />
+              <ComponentComparison
+                label="RAM"
+                icon={<MemoryStick className="w-5 h-5" />}
+                score={compatibility.components.ram}
+              />
+              <ComponentComparison
+                label="Storage"
+                icon={<HardDrive className="w-5 h-5" />}
+                score={compatibility.components.storage}
+              />
+            </div>
 
-        <BottleneckCard 
-          bottleneck={compatibility.bottleneck} 
-          suggestions={compatibility.suggestions} 
-        />
+            <BottleneckCard 
+              bottleneck={compatibility.bottleneck} 
+              suggestions={compatibility.suggestions} 
+            />
+          </>
+        ) : (
+          <div className="glass-card p-10 text-center rounded-xl bg-amber-500/5 border border-amber-500/20">
+            <MonitorPlay className="w-12 h-12 text-amber-500/50 mx-auto mb-4" />
+            <h3 className="text-xl font-bold uppercase italic text-amber-500 mb-2">Hardware Setup Required</h3>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              Please enter your system specifications on the Dashboard to unlock customized FPS estimates and compatibility grading.
+            </p>
+          </div>
+        )}
       </div>
     );
   }
@@ -182,12 +194,12 @@ export function SearchView({ systemInfo, games, library, onAddGame, onToggleLibr
         {showLocal ? (
            // Show local games
            games.map(game => {
-             const result = checkCompatibility(systemInfo, game);
+             const result = systemInfo ? checkCompatibility(systemInfo, game) : null;
              return (
                <GameCard
                  key={game.id}
                  game={game}
-                 compatibility={result}
+                 compatibility={result !== null ? result : undefined}
                  onClick={() => setSelectedGame(game)}
                  isInLibrary={library.some(l => l.id === game.id)}
                  onLibraryToggle={() => onToggleLibrary(game.id)}

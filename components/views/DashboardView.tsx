@@ -11,25 +11,106 @@ import { GameCard } from '@/components/game/GameCard';
 import { GameSearch } from '@/components/game/GameSearch';
 import { ComponentComparison } from '@/components/compatibility/ComponentComparison';
 import { BottleneckCard } from '@/components/compatibility/BottleneckCard';
-import { FpsPredictionCard } from '@/components/compatibility/FpsPredictionCard';
-import { AiAnalysisCard } from '@/components/compatibility/AiAnalysisCard';
-import { Cpu, MonitorPlay, MemoryStick, HardDrive, ArrowLeft, Zap, History, Flame, Sparkles } from 'lucide-react';
+import { HardDrive, ArrowLeft, Zap, History, Flame, Sparkles, PenTool, Cpu, MonitorPlay, MemoryStick } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { DownloadAppBanner } from '@/components/layout/DownloadAppBanner';
+import { ManualSystemInput } from '@/components/system-specs/ManualSystemInput';
 
 interface DashboardViewProps {
-  systemInfo: SystemInfo;
+  systemInfo: SystemInfo | null;
   games: Game[];
   library: Game[];
   onToggleLibrary: (gameId: number) => void;
+  onDetectHardware: () => void;
+  onManualSave: (info: SystemInfo) => void;
   isElectron: boolean;
 }
 
-export function DashboardView({ systemInfo, games, library, onToggleLibrary, isElectron }: DashboardViewProps) {
+export function DashboardView({ systemInfo, games, library, onToggleLibrary, onDetectHardware, onManualSave, isElectron }: DashboardViewProps) {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [recentChecks, setRecentChecks] = useState<{game: Game, result: CompatibilityResult}[]>([]);
+  const [showManualInput, setShowManualInput] = useState(false);
   const { user } = useAuth();
+
+  // If no system info, show setup view
+  if (!systemInfo) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-8 animate-in fade-in duration-1000">
+        <div className="relative">
+          <div className="absolute -inset-4 bg-primary/20 blur-3xl rounded-full" />
+          <Cpu className="w-24 h-24 text-primary relative" />
+        </div>
+        
+        <div className="space-y-4 max-w-2xl">
+          <h2 className="text-4xl font-black italic tracking-tighter uppercase">First-Time Setup</h2>
+          <p className="text-muted-foreground text-lg leading-relaxed">
+            Welcome to <strong>FPS Test</strong>. To estimate your performance in games, we need to securely scan your PC hardware. This process is one-time and will be saved to your cloud account.
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-4">
+          {isElectron ? (
+            <Button 
+              size="lg" 
+              onClick={onDetectHardware}
+              className="h-16 px-10 text-xl font-bold italic uppercase gap-3 hover:scale-105 transition-transform"
+            >
+              <Zap className="w-6 h-6 fill-black" />
+              Run Hardware Scan
+            </Button>
+          ) : (
+            <>
+              <Button 
+                size="lg" 
+                onClick={() => setShowManualInput(true)}
+                className="h-16 px-10 text-xl font-bold italic uppercase hover:scale-105 transition-transform gap-3"
+              >
+                <PenTool className="w-6 h-6 fill-black" />
+                Enter Specs Manually
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                onClick={() => {
+                  alert('Desktop App release coming soon! For now, enter your specs manually.');
+                }}
+                className="h-16 px-8 text-xl font-bold italic uppercase hover:bg-white/5 transition-colors group gap-3"
+              >
+                <MonitorPlay className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                Download Desktop App
+              </Button>
+            </>
+          )}
+        </div>
+
+        <ManualSystemInput 
+          open={showManualInput} 
+          onOpenChange={setShowManualInput} 
+          onSave={onManualSave} 
+          currentSystemInfo={systemInfo}
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl pt-10">
+          <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2">
+            <MonitorPlay className="w-8 h-8 text-purple-400" />
+            <h3 className="font-bold uppercase italic">GPU Analysis</h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">Detecting your exact VRAM and driver version for precise FPS scaling.</p>
+          </div>
+          <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2">
+            <Cpu className="w-8 h-8 text-blue-400" />
+            <h3 className="font-bold uppercase italic">CPU Grading</h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">Calculating single-core and multi-core performance ratings.</p>
+          </div>
+          <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2">
+            <MemoryStick className="w-8 h-8 text-amber-400" />
+            <h3 className="font-bold uppercase italic">RAM Verification</h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">Ensuring you have enough memory for modern AAA titles.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Automatically sync to cloud when systemInfo or user changes
   useEffect(() => {
@@ -49,7 +130,7 @@ export function DashboardView({ systemInfo, games, library, onToggleLibrary, isE
   }, [user]);
   
   const compatibility = useMemo(() => {
-    if (!selectedGame) return null;
+    if (!selectedGame || !systemInfo) return null;
     const result = checkCompatibility(systemInfo, selectedGame);
     
     // Save to recently analyzed when compatibility is calculated
@@ -61,7 +142,7 @@ export function DashboardView({ systemInfo, games, library, onToggleLibrary, isE
     return result;
   }, [selectedGame, systemInfo, user]);
 
-  if (selectedGame && compatibility) {
+  if (selectedGame && compatibility && systemInfo) {
     return (
       <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
         <Button 
@@ -129,7 +210,18 @@ export function DashboardView({ systemInfo, games, library, onToggleLibrary, isE
       </section>
 
       {/* System Overview */}
-      <SystemOverview systemInfo={systemInfo} />
+      <SystemOverview 
+        systemInfo={systemInfo} 
+        onRefresh={isElectron ? onDetectHardware : undefined} 
+        onEditSpecs={!isElectron ? () => setShowManualInput(true) : undefined}
+      />
+
+      <ManualSystemInput 
+        open={showManualInput} 
+        onOpenChange={setShowManualInput} 
+        onSave={onManualSave} 
+        currentSystemInfo={systemInfo}
+      />
 
       {/* Download Banner for Web Users */}
       {!isElectron && <DownloadAppBanner />}
@@ -189,7 +281,7 @@ export function DashboardView({ systemInfo, games, library, onToggleLibrary, isE
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {popularGames.map(game => {
-            const result = checkCompatibility(systemInfo, game);
+            const result = systemInfo ? checkCompatibility(systemInfo, game) : null;
             return (
               <GameCard
                 key={game.id}

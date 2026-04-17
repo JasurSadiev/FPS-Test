@@ -12,9 +12,9 @@
     "start": "next start",
     "lint": "eslint .",
     "electron:dev": "concurrently \"pnpm dev\" \"wait-on http://localhost:3000 && electron .\"",
-    "electron:build": "set ELECTRON_BUILD=true && next build && electron-builder",
-    "electron:pack": "set ELECTRON_BUILD=true && electron-builder --dir",
-    "electron:dist": "set ELECTRON_BUILD=true && electron-builder"
+    "electron:build": "node scripts/electron-build.js",
+    "electron:pack": "node scripts/electron-build.js",
+    "electron:dist": "node scripts/electron-build.js"
   },
   "build": {
     "appId": "com.fpstest.app",
@@ -25,8 +25,10 @@
     "files": [
       "electron/**/*",
       "out/**/*",
+      "package.json",
       "public/**/*"
     ],
+    "asar": true,
     "win": {
       "target": [
         "nsis",

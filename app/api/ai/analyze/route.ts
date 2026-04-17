@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 
+// Required for Next.js static export (Electron build)
+export const dynamic = 'force-static';
+
 export async function POST(request: Request) {
   const apiKey = process.env.GOOGLE_AI_API_KEY;
 

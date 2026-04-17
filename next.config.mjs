@@ -8,7 +8,7 @@ const nextConfig = {
   },
   // Enable static export for Electron
   output: process.env.ELECTRON_BUILD === 'true' ? 'export' : undefined,
+  trailingSlash: true,
 }
-
 
 export default nextConfig

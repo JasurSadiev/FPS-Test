@@ -5,16 +5,17 @@ import { CpuCard } from './CpuCard';
 import { GpuCard } from './GpuCard';
 import { RamCard } from './RamCard';
 import { StorageCard } from './StorageCard';
-import { Monitor, RefreshCw } from 'lucide-react';
+import { Monitor, RefreshCw, PenTool } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface SystemOverviewProps {
   systemInfo: SystemInfo;
   onRefresh?: () => void;
+  onEditSpecs?: () => void;
   isLoading?: boolean;
 }
 
-export function SystemOverview({ systemInfo, onRefresh, isLoading }: SystemOverviewProps) {
+export function SystemOverview({ systemInfo, onRefresh, onEditSpecs, isLoading }: SystemOverviewProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -29,17 +30,30 @@ export function SystemOverview({ systemInfo, onRefresh, isLoading }: SystemOverv
             </p>
           </div>
         </div>
-        {onRefresh && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={onRefresh}
-            disabled={isLoading}
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-            Rescan
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {onEditSpecs && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={onEditSpecs}
+              disabled={isLoading}
+            >
+              <PenTool className="w-4 h-4 mr-2" />
+              Edit Specs
+            </Button>
+          )}
+          {onRefresh && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={onRefresh}
+              disabled={isLoading}
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+              Rescan
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 
+// Required for Next.js static export (Electron build)
+export const dynamic = 'force-static';
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get('q');

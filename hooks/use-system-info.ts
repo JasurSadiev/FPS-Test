@@ -44,11 +44,13 @@ function convertElectronToSystemInfo(electronInfo: ElectronSystemInfo): SystemIn
 
 export function useSystemInfo() {
   const [systemInfo, setSystemInfo] = useState<SystemInfo | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isElectron, setIsElectron] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isElectron, setIsElectron] = useState<boolean>(
+    typeof window !== 'undefined' && !!(window as any).electronAPI?.isElectron
+  );
   const [error, setError] = useState<string | null>(null);
 
-  const fetchSystemInfo = useCallback(async () => {
+  const detect = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -56,36 +58,43 @@ export function useSystemInfo() {
       // Check if running in Electron
       if (typeof window !== 'undefined' && window.electronAPI?.isElectron) {
         setIsElectron(true);
-        const electronInfo = await window.electronAPI.getSystemInfo();
+        
+        // Add a timeout for the IPC call to prevent UI hanging
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Hardware detection timed out')), 60000)
+        );
+
+        const electronInfo = await Promise.race([
+          window.electronAPI.getSystemInfo(),
+          timeoutPromise
+        ]) as ElectronSystemInfo;
+
         const converted = convertElectronToSystemInfo(electronInfo);
         setSystemInfo(converted);
+        return converted;
       } else {
         // Use mock data for web preview
         setIsElectron(false);
-        // Simulate a small delay to show loading state
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 800));
         setSystemInfo(mockSystemInfo);
+        return mockSystemInfo;
       }
     } catch (err) {
       console.error('Failed to get system info:', err);
       setError(err instanceof Error ? err.message : 'Failed to detect system');
-      // Fallback to mock data
-      setSystemInfo(mockSystemInfo);
+      throw err;
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    fetchSystemInfo();
-  }, [fetchSystemInfo]);
-
   return {
     systemInfo,
+    setSystemInfo,
     isLoading,
     isElectron,
     error,
-    refresh: fetchSystemInfo,
+    detect,
   };
 }
 

@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { parseSteamRequirements } from '@/lib/steam-utils';
 import type { Game } from '@/lib/types';
 
+// Required for Next.js static export (Electron build)
+export const dynamic = 'force-static';
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const appId = searchParams.get('appId');

@@ -26,8 +26,14 @@ export function GameSearch({ onSelect }: GameSearchProps) {
     const timeoutId = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const res = await fetch(`/api/steam/search?q=${encodeURIComponent(query)}`);
-        const data = await res.json();
+        let data;
+        if (typeof window !== 'undefined' && (window as any).electronAPI?.isElectron) {
+          data = await (window as any).electronAPI.steamSearch(query);
+        } else {
+          const res = await fetch(`/api/steam/search?q=${encodeURIComponent(query)}`);
+          data = await res.json();
+        }
+
         if (Array.isArray(data)) {
           setSearchResults(data.slice(0, 6)); // limit to 6 for dropdown
         } else {
@@ -49,9 +55,15 @@ export function GameSearch({ onSelect }: GameSearchProps) {
     setTimeout(() => setIsFocused(false), 100);
     
     try {
-      const res = await fetch(`/api/steam/details?appId=${app.appid}`);
-      if (!res.ok) throw new Error('Details failed');
-      const data = await res.json();
+      let data;
+      if (typeof window !== 'undefined' && (window as any).electronAPI?.isElectron) {
+        data = await (window as any).electronAPI.steamDetails(app.appid);
+      } else {
+        const res = await fetch(`/api/steam/details?appId=${app.appid}`);
+        if (!res.ok) throw new Error('Details failed');
+        data = await res.json();
+      }
+
       if (data.game) {
         onSelect(data.game);
       }
@@ -62,6 +74,7 @@ export function GameSearch({ onSelect }: GameSearchProps) {
       setIsLoadingDetails(false);
     }
   };
+
 
   const showDropdown = isFocused && searchResults.length > 0;
 
