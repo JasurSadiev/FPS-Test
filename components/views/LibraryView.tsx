@@ -14,8 +14,8 @@ interface LibraryViewProps {
   systemInfo: SystemInfo | null;
   library: Game[];
   allGames: Game[];
-  onAddToLibrary: (gameId: number) => void;
-  onRemoveFromLibrary: (gameId: number) => void;
+  onAddToLibrary: (gameId: number | string, gameData?: Game) => void;
+  onRemoveFromLibrary: (gameId: number | string, gameData?: Game) => void;
 }
 
 export function LibraryView({ 
@@ -43,8 +43,8 @@ export function LibraryView({
   }, [libraryWithCompatibility, filterVerdict]);
 
   const gamesNotInLibrary = useMemo(() => {
-    const libraryIds = new Set(library.map(g => g.id));
-    return allGames.filter(g => !libraryIds.has(g.id));
+    const libraryIds = new Set(library.map(g => String(g.id)));
+    return allGames.filter(g => !libraryIds.has(String(g.id)));
   }, [library, allGames]);
 
   const compatibility = useMemo(() => {
@@ -103,7 +103,7 @@ export function LibraryView({
           variant="full" 
           isInLibrary={true}
           onLibraryToggle={() => {
-            onRemoveFromLibrary(selectedGame.id);
+            onRemoveFromLibrary(selectedGame.id, selectedGame);
             setSelectedGame(null);
           }}
         />
@@ -221,7 +221,7 @@ export function LibraryView({
               compatibility={compatibility || undefined}
               onClick={() => setSelectedGame(game)}
               isInLibrary={true}
-              onLibraryToggle={() => onRemoveFromLibrary(game.id)}
+              onLibraryToggle={() => onRemoveFromLibrary(game.id, game)}
             />
           ))}
         </div>

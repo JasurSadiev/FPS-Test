@@ -11,6 +11,8 @@ import { GameCard } from '@/components/game/GameCard';
 import { GameSearch } from '@/components/game/GameSearch';
 import { ComponentComparison } from '@/components/compatibility/ComponentComparison';
 import { BottleneckCard } from '@/components/compatibility/BottleneckCard';
+import { AiAnalysisCard } from '@/components/compatibility/AiAnalysisCard';
+import { FpsPredictionCard } from '@/components/compatibility/FpsPredictionCard';
 import { HardDrive, ArrowLeft, Zap, History, Flame, Sparkles, PenTool, Cpu, MonitorPlay, MemoryStick } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -154,7 +156,13 @@ export function DashboardView({ systemInfo, games, library, onToggleLibrary, onD
           Back to Dashboard
         </Button>
 
-        <GameCard game={selectedGame} compatibility={compatibility} variant="full" />
+        <GameCard 
+          game={selectedGame} 
+          compatibility={compatibility} 
+          variant="full" 
+          isInLibrary={library.some(l => String(l.id) === String(selectedGame.id))}
+          onLibraryToggle={() => onToggleLibrary(selectedGame.id, selectedGame)}
+        />
 
         <AiAnalysisCard 
           systemInfo={systemInfo} 
@@ -243,8 +251,8 @@ export function DashboardView({ systemInfo, games, library, onToggleLibrary, onD
                     game={game}
                     compatibility={result}
                     onClick={() => setSelectedGame(game)}
-                    isInLibrary={library.some(l => l.id === game.id)}
-                    onLibraryToggle={() => onToggleLibrary(game.id)}
+                    isInLibrary={library.some(l => String(l.id) === String(game.id))}
+                    onLibraryToggle={() => onToggleLibrary(game.id, game)}
                   />
                 </div>
               ))}
@@ -288,8 +296,8 @@ export function DashboardView({ systemInfo, games, library, onToggleLibrary, onD
                 game={game}
                 compatibility={result}
                 onClick={() => setSelectedGame(game)}
-                isInLibrary={library.some(l => l.id === game.id)}
-                onLibraryToggle={() => onToggleLibrary(game.id)}
+                isInLibrary={library.some(l => String(l.id) === String(game.id))}
+                onLibraryToggle={() => onToggleLibrary(game.id, game)}
               />
             );
           })}

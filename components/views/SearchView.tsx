@@ -18,7 +18,7 @@ interface SearchViewProps {
   games: Game[];
   library: Game[];
   onAddGame: (game: Omit<Game, 'id'>) => void;
-  onToggleLibrary: (gameId: number) => void;
+  onToggleLibrary: (gameId: number | string, gameData?: Game) => void;
 }
 
 export function SearchView({ systemInfo, games, library, onAddGame, onToggleLibrary }: SearchViewProps) {
@@ -97,8 +97,9 @@ export function SearchView({ systemInfo, games, library, onAddGame, onToggleLibr
           game={selectedGame} 
           compatibility={compatibility} 
           variant="full" 
-          isInLibrary={library.some(l => l.id === selectedGame.id)}
-          onLibraryToggle={() => onToggleLibrary(selectedGame.id)}
+          isInLibrary={library.some(l => String(l.id) === String(selectedGame.id))}
+          isInLibrary={library.some(l => String(l.id) === String(selectedGame.id))}
+          onLibraryToggle={() => onToggleLibrary(selectedGame.id, selectedGame)}
         />
         
         {compatibility ? (
@@ -201,8 +202,8 @@ export function SearchView({ systemInfo, games, library, onAddGame, onToggleLibr
                  game={game}
                  compatibility={result !== null ? result : undefined}
                  onClick={() => setSelectedGame(game)}
-                 isInLibrary={library.some(l => l.id === game.id)}
-                 onLibraryToggle={() => onToggleLibrary(game.id)}
+                 isInLibrary={library.some(l => String(l.id) === String(game.id))}
+                 onLibraryToggle={() => onToggleLibrary(game.id, game)}
                />
              );
            })

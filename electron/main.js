@@ -243,24 +243,33 @@ ipcMain.handle('get-gpu-usage', async () => {
 });
 
 // ── IPC: API Migrations ────────────────────────────────────────────────────────
-
-// Light .env parser for the main process (useful for development config)
+// Robust .env loader for main process (Handles Dev vs Production)
 try {
   const fs = require('fs');
-  const envPath = path.join(__dirname, '../.env');
-  if (fs.existsSync(envPath)) {
-    const envFile = fs.readFileSync(envPath, 'utf8');
-    envFile.split('\n').forEach(line => {
-      const parts = line.split('=');
-      if (parts.length >= 2) {
-        const k = parts[0].trim();
-        const v = parts.slice(1).join('=').trim();
-        if (k && !process.env[k]) process.env[k] = v;
-      }
-    });
+  const possiblePaths = [
+    path.join(__dirname, '../.env'),                // Dev: root project
+    path.join(process.resourcesPath, '.env'),       // Prod: next to asar
+    path.join(process.resourcesPath, 'app/.env'),   // Prod: inside app (if bundled)
+    path.join(path.dirname(process.execPath), '.env') // Prod: next to .exe
+  ];
+
+  for (const envPath of possiblePaths) {
+    if (fs.existsSync(envPath)) {
+      console.log(`[ENV] Loading environment from: ${envPath}`);
+      const envFile = fs.readFileSync(envPath, 'utf8');
+      envFile.split(/\r?\n/).forEach(line => {
+        const parts = line.split('=');
+        if (parts.length >= 2) {
+          const k = parts[0].trim();
+          const v = parts.slice(1).join('=').trim().replace(/^["']|["']$/g, ''); // strip quotes
+          if (k && !process.env[k]) process.env[k] = v;
+        }
+      });
+      break; // Stop at first found .env
+    }
   }
 } catch (e) {
-  // Silent fallback
+  console.error('[ENV] Failed to load .env:', e);
 }
 
 // Steam Search Proxy

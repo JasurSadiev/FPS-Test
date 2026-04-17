@@ -75,30 +75,46 @@ export default function Home() {
     setGames(prev => [...prev, newGame]);
   }, []);
 
-  const handleToggleLibrary = useCallback(async (gameId: number) => {
-    if (!user) return;
-    const existingIndex = library.findIndex(g => g.id === gameId);
+  const handleToggleLibrary = useCallback(async (gameId: number | string, gameData?: Game) => {
+    if (!user) {
+      console.warn('[LIBRARY] Toggle failed: No user authenticated');
+      return;
+    }
+
+    const gameIdStr = String(gameId);
+    console.log(`[LIBRARY] Toggling game: ${gameIdStr}`, gameData?.name || 'Unknown');
+
+    const existingIndex = library.findIndex(g => String(g.id) === gameIdStr);
     
     if (existingIndex > -1) {
       // Remove
-      setLibrary(prev => prev.filter(g => g.id !== gameId));
+      setLibrary(prev => prev.filter(g => String(g.id) !== gameIdStr));
       try {
-        await userService.removeFromLibrary(user.uid, gameId);
+        await userService.removeFromLibrary(user.uid, Number(gameId));
         toast.info("Removed from cloud library");
       } catch (err) {
+        console.error('[LIBRARY] Remove failed:', err);
         toast.error("Failed to sync changes");
       }
     } else {
       // Add
-      const game = games.find(g => g.id === gameId) || popularGames.find(g => g.id === gameId);
-      if (game) {
-        setLibrary(prev => [...prev, game]);
+      // Strategy: Check if gameData was provided (from search), otherwise find in local lists
+      const gameToSave = gameData || 
+                         games.find(g => String(g.id) === gameIdStr) || 
+                         popularGames.find(g => String(g.id) === gameIdStr);
+
+      if (gameToSave) {
+        console.log('[LIBRARY] Adding game to library:', gameToSave.name);
+        setLibrary(prev => [...prev, gameToSave]);
         try {
-          await userService.addToLibrary(user.uid, game);
+          await userService.addToLibrary(user.uid, gameToSave);
           toast.success("Saved to your account");
         } catch (err) {
+          console.error('[LIBRARY] Add failed:', err);
           toast.error("Cloud sync failed");
         }
+      } else {
+        console.warn(`[LIBRARY] Could not find game data for ID: ${gameIdStr}`);
       }
     }
   }, [games, library, user]);
