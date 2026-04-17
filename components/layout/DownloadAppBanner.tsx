@@ -5,8 +5,7 @@ import { Button } from '@/components/ui/button';
 
 export function DownloadAppBanner() {
   const handleDownload = () => {
-    // This will be replaced by the actual Vercel/GitHub download link
-    window.location.href = 'https://github.com/JasurSadiev/FPS-Test/releases/download/v1.0.0/FPSTest-Setup.exe';
+    window.location.href = 'https://github.com/JasurSadiev/FPS-Test/releases/download/v2.0.0/FPS.Test.Setup.1.0.0.exe';
   };
 
   return (
@@ -53,7 +52,7 @@ export function DownloadAppBanner() {
             Download Installer
           </Button>
           <p className="text-center mt-3 text-xs text-muted-foreground">
-            Version 1.0.0 • 64-bit EXE
+            Version 2.0.0 • 64-bit EXE
           </p>
         </div>
       </div>
