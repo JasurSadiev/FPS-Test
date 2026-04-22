@@ -65,7 +65,7 @@ export interface Game {
 }
 
 // Compatibility Types
-export type Verdict = 'cannot-run' | 'poor-experience' | 'minimum' | 'recommended' | 'exceeds';
+export type Verdict = 'cannot-run' | 'below-minimum' | 'poor-experience' | 'minimum' | 'recommended' | 'exceeds';
 
 export interface ComponentScore {
   score: number; // 0-100
@@ -74,6 +74,7 @@ export interface ComponentScore {
   recRequired?: string;
   meetsMinimum: boolean;
   meetsRecommended: boolean;
+  vramPasses?: boolean; // New flag for independent VRAM check
 }
 
 export interface FpsEstimate {

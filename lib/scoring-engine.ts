@@ -12,25 +12,56 @@ const WEIGHTS = {
 // Realistic GPU Scoring
 function scoreGpuRealistic(name: string, vramMb: number): number {
   const nameLower = name.toLowerCase();
-  let baseScore = 15; // Lower fallback for unknown/general cards
+  
+  // High End (80-100)
+  if (nameLower.includes('4090') || nameLower.includes('7900 xtx')) return 100;
+  if (nameLower.includes('4080') || nameLower.includes('7900 xt')) return 92;
+  if (nameLower.includes('4070 ti') || nameLower.includes('7900 gre')) return 88;
+  if (nameLower.includes('4070') || nameLower.includes('7800 xt')) return 82;
+  if (nameLower.includes('3090') || nameLower.includes('6950 xt')) return 85;
+  if (nameLower.includes('3080') || nameLower.includes('6900 xt')) return 80;
+  
+  // Upper Mid (60-79)
+  if (nameLower.includes('4060 ti') || nameLower.includes('7700 xt')) return 75;
+  if (nameLower.includes('3070 ti') || nameLower.includes('6800 xt')) return 72;
+  if (nameLower.includes('3070') || nameLower.includes('6800')) return 68;
+  if (nameLower.includes('2080 ti')) return 65;
+  if (nameLower.includes('2080 super') || nameLower.includes('3060 ti')) return 62;
+  if (nameLower.includes('2080') || nameLower.includes('6700 xt')) return 60;
 
-  // Tiered lookup
-  if (nameLower.includes('4090') || nameLower.includes('7900 xtx')) baseScore = 100;
-  else if (nameLower.includes('4070') || nameLower.includes('7800 xt')) baseScore = 78;
-  else if (nameLower.includes('3060') || nameLower.includes('6600')) baseScore = 58;
-  else if (nameLower.includes('1660') || nameLower.includes('580')) baseScore = 38;
-  else if (nameLower.includes('1050') || nameLower.includes('960')) baseScore = 18;
-  else if (nameLower.includes('1030') || nameLower.includes('750') || nameLower.includes('950')) baseScore = 12;
+  // Mid Range (40-59)
+  if (nameLower.includes('4060') || nameLower.includes('7600')) return 58;
+  if (nameLower.includes('3060') || nameLower.includes('6600 xt')) return 55;
+  if (nameLower.includes('2070') || nameLower.includes('6600')) return 52;
+  if (nameLower.includes('1080 ti') || nameLower.includes('5700 xt')) return 50;
+  if (nameLower.includes('2060 super') || nameLower.includes('arc a770')) return 48;
+  if (nameLower.includes('2060') || nameLower.includes('5700') || nameLower.includes('arc a750')) return 45;
+  if (nameLower.includes('1080') || nameLower.includes('vega 64')) return 42;
+  if (nameLower.includes('1070') || nameLower.includes('5600 xt')) return 40;
+
+  // Budget / Older (20-39)
+  if (nameLower.includes('3050') || nameLower.includes('1660 ti')) return 38;
+  if (nameLower.includes('1660 super') || nameLower.includes('1660')) return 35;
+  if (nameLower.includes('1060 6gb') || nameLower.includes('590')) return 32;
+  if (nameLower.includes('1060 3gb') || nameLower.includes('580') || nameLower.includes('480')) return 30;
+  if (nameLower.includes('1650 super') || nameLower.includes('5500 xt')) return 28;
+  if (nameLower.includes('1650') || nameLower.includes('570')) return 25;
+  if (nameLower.includes('970') || nameLower.includes('1050 ti')) return 22;
+  if (nameLower.includes('960') || nameLower.includes('1050')) return 20;
+
+  // Legacy / Basic (0-19)
+  let baseScore = 15;
+  if (nameLower.includes('1030') || nameLower.includes('750') || nameLower.includes('950')) baseScore = 12;
   else if (nameLower.includes('640') || nameLower.includes('650') || nameLower.includes('550')) baseScore = 8;
   else if (nameLower.includes('integrated') || nameLower.includes('graphics') || nameLower.includes('hd ')) baseScore = 5;
 
-  // VRAM bonus
+  // Smarter fallback: Guess based on VRAM also
   const vramGb = vramMb / 1024;
   let bonus = 0;
   if (vramGb >= 16) bonus = 5;
   else if (vramGb >= 12) bonus = 3;
   else if (vramGb >= 8) bonus = 1;
-  else if (vramGb < 4) bonus = -10;
+  else if (vramGb < 4) bonus = -5;
 
   return Math.min(100, Math.max(0, baseScore + bonus));
 }
@@ -38,28 +69,51 @@ function scoreGpuRealistic(name: string, vramMb: number): number {
 // Realistic CPU Scoring
 function scoreCpuRealistic(name: string, cores: number, speed: number): number {
   const nameLower = name.toLowerCase();
-  let baseScore = 25; // Lower fallback for unknown/general CPUs
+  
+  // High End
+  if (nameLower.includes('14900') || nameLower.includes('7950x')) return 100;
+  if (nameLower.includes('13900') || nameLower.includes('7900x')) return 92;
+  if (nameLower.includes('12900') || nameLower.includes('5950x')) return 85;
+  
+  // Upper Mid
+  if (nameLower.includes('14700') || nameLower.includes('7800x')) return 80;
+  if (nameLower.includes('13700') || nameLower.includes('7700x')) return 78;
+  if (nameLower.includes('12700') || nameLower.includes('5800x')) return 72;
+  if (nameLower.includes('13600') || nameLower.includes('7600')) return 68;
 
-  // Tiered lookup
-  if (nameLower.includes('14900k') || nameLower.includes('7950x')) baseScore = 95;
-  else if (nameLower.includes('13700k') || nameLower.includes('7700x')) baseScore = 80;
-  else if (nameLower.includes('13600k') || nameLower.includes('7600')) baseScore = 68;
-  else if (nameLower.includes('10400') || nameLower.includes('3600')) baseScore = 52;
-  else if (nameLower.includes('i3') || nameLower.includes('ryzen 3') || nameLower.includes('quad') || nameLower.includes('xeon')) baseScore = 38;
+  // Mid Range
+  if (nameLower.includes('12600') || nameLower.includes('5600x')) return 60;
+  if (nameLower.includes('12400') || nameLower.includes('5600')) return 55;
+  if (nameLower.includes('10700') || nameLower.includes('3700x')) return 52;
+  if (nameLower.includes('10400') || nameLower.includes('3600')) return 48;
+  if (nameLower.includes('i7') || nameLower.includes('ryzen 7')) return 45;
+  if (nameLower.includes('i5') || nameLower.includes('ryzen 5')) return 40;
+
+  // Budget / Older
+  let baseScore = 30;
+  if (nameLower.includes('i3') || nameLower.includes('ryzen 3') || nameLower.includes('quad')) baseScore = 35;
   else if (nameLower.includes('duo') || nameLower.includes('pentium') || nameLower.includes('celeron')) baseScore = 15;
 
-  // Core bonus: Add (coreCount - 4) * 1.5 clamped to max +12 bonus
-  const coreBonus = Math.min(12, Math.max(0, (cores - 4) * 1.5));
+  // Core bonus: Add (coreCount - 4) * 2 clamped to max +20 bonus
+  const coreBonus = Math.min(20, Math.max(0, (cores - 4) * 2));
   
-  // GHz bonus: Add (ghz - 3.0) * 4 clamped to max +8 bonus
-  const ghzBonus = Math.min(8, Math.max(0, (speed - 3.0) * 4));
+  // GHz bonus: Add (ghz - 3.0) * 5 clamped to max +10 bonus
+  const ghzBonus = Math.min(10, Math.max(0, (speed - 3.0) * 5));
 
   return Math.min(100, Math.max(0, baseScore + coreBonus + ghzBonus));
 }
 
 // Realistic RAM Scoring
 function scoreRamRealistic(bytes: number): number {
+  if (!bytes || isNaN(bytes)) return 0;
+  
   const gb = bytes / (1024 * 1024 * 1024);
+  
+  // Handle extreme high-end
+  if (gb >= 64) return 100;
+  // Handle extreme low-end
+  if (gb <= 0.5) return 0;
+
   const breakpoints = [
     { gb: 0, score: 0 },
     { gb: 4, score: 15 },
@@ -78,7 +132,8 @@ function scoreRamRealistic(bytes: number): number {
       return Math.round(start.score + ratio * (end.score - start.score));
     }
   }
-  return 100;
+  
+  return 45; // Safe default for middle-tier if loop somehow misses
 }
 
 // Realistic Storage Scoring
@@ -100,30 +155,50 @@ function scoreStorageRealistic(type: string): number {
   return Math.min(100, Math.max(0, baseScore + speedBonus));
 }
 
-// Generate FPS estimates using realistic power curve formula
-function estimateFpsRealistic(gpuScore: number, cpuScore: number, ramScore: number, storageScore: number): FpsEstimate {
-  // Step 2 — Weighted composite score
-  const weighted = (gpuScore * 0.55) + (cpuScore * 0.25) + (ramScore * 0.15) + (storageScore * 0.05);
+// Generate FPS estimates using game-relative performance scaling
+function estimateFpsRealistic(userScores: any, reqScores: any): FpsEstimate {
+  // Use weighted formula for composite scores
+  const getComposite = (s: any) => (s.gpu * 0.55) + (s.cpu * 0.25) + (s.ram * 0.15) + (s.storage * 0.05);
   
-  // Step 3 — Apply a power curve
-  const MAX_FPS = 240;
-  const curved = MAX_FPS * Math.pow(weighted / 100, 0.8);
+  const userC = getComposite(userScores);
+  const minC = getComposite(reqScores.min);
+  const recC = reqScores.rec.gpu > 0 ? getComposite(reqScores.rec) : minC * 1.5;
 
-  // Step 4 — Apply quality multipliers
-  const multipliers = { low: 1.0, medium: 0.70, high: 0.45 };
-  const minFPS = { low: 24, medium: 15, high: 10 };
+  // Reliability flag
+  const isBelowMin = userC < minC * 0.95;
 
+  // Base FPS scaling:
+  // If user == min, base ~35 FPS
+  // If user == rec, base ~75 FPS
+  let baseFps = 30;
+  if (userC >= recC) {
+    const ratio = userC / recC;
+    baseFps = 60 + (ratio - 1) * 60; // Scale up beyond 60
+  } else if (userC >= minC) {
+    const ratio = (userC - minC) / (recC - minC);
+    baseFps = 35 + ratio * 35; // Interpolate between 35 and 70
+  } else {
+    const ratio = userC / minC;
+    baseFps = 15 + ratio * 20; // Falling below minimum
+  }
+
+  // Quality multipliers
+  const multipliers = { low: 1.2, medium: 1.0, high: 0.65 };
+  
   const calculateTier = (quality: keyof typeof multipliers) => {
-    const fps = Math.round(curved * multipliers[quality]);
-    const finalFPS = Math.max(fps, minFPS[quality]);
-    
-    // Step 5 — Add variance range
-    const variance = Math.round(finalFPS * 0.07);
-    const min = Math.max(minFPS[quality], finalFPS - variance);
-    const max = finalFPS + variance;
+    const targetFps = baseFps * multipliers[quality];
+    const variance = targetFps * 0.1;
+    const min = Math.max(10, Math.round(targetFps - variance));
+    const max = Math.round(targetFps + variance);
 
-    if (max < 30) return '<30 FPS';
-    return `${min}-${max} FPS`;
+    let result = max < 25 ? '<30 FPS' : `${min}-${max} FPS`;
+    
+    // Add stability warning if below minimum
+    if (isBelowMin) {
+      result += ' (May be unstable)';
+    }
+    
+    return result;
   };
 
   return {
@@ -133,87 +208,92 @@ function estimateFpsRealistic(gpuScore: number, cpuScore: number, ramScore: numb
   };
 }
 
-// Determine verdict based on score and estimated performance
-function determineVerdict(score: number, components: CompatibilityResult['components'], fps: FpsEstimate): Verdict {
-  const allMeetMinimum = Object.values(components).every(c => c.meetsMinimum);
-  const allMeetRecommended = Object.values(components).every(c => c.meetsRecommended);
-
-  if (!allMeetMinimum) {
-    // AS REQUESTED: Only show "Cannot Run" if they are truly on integrated/ultra-low end hardware (score < 10)
-    // If they have a dedicated GPU (even a 1050), never show 'cannot-run'
-    if (components.gpu.score >= 12) return 'poor-experience';
-    return 'cannot-run';
-  }
-
-  // Parse Low FPS to check for poor experience
-  const lowFpsAvg = fps.low.includes('-') 
-    ? (parseInt(fps.low.split('-')[0]) + parseInt(fps.low.split('-')[1])) / 2 
-    : (fps.low.includes('<30') ? 25 : 144);
-
-  if (lowFpsAvg < 30) return 'poor-experience';
-
-  if (score >= 90) return 'exceeds';
-  if (allMeetRecommended && score >= 75) return 'recommended';
-  return 'minimum';
-}
-
-// Generate upgrade suggestions based on realistic scores
+/**
+ * Generate upgrade suggestions based on realistic scores
+ */
 function generateSuggestions(components: CompatibilityResult['components']): string[] {
   const suggestions: string[] = [];
-
-  const sortedComponents = Object.entries(components)
-    .sort(([, a], [, b]) => a.score - b.score);
+  const sortedComponents = Object.entries(components).sort(([, a], [, b]) => a.score - b.score);
 
   for (const [component, score] of sortedComponents) {
     if (score.score < 50) {
       switch (component) {
-        case 'gpu':
-          suggestions.push(`A GPU upgrade would significantly boost your performance`);
-          break;
-        case 'cpu':
-          suggestions.push(`Your CPU is currently a major performance bottleneck`);
-          break;
-        case 'ram':
-          suggestions.push(`Upgrading to 16GB RAM would reduce micro-stutters`);
-          break;
-        case 'storage':
-          suggestions.push(`Switching to an NVMe SSD would improve loading times`);
-          break;
+        case 'gpu': suggestions.push(`A GPU upgrade would significantly boost your performance`); break;
+        case 'cpu': suggestions.push(`Your CPU is currently a major performance bottleneck`); break;
+        case 'ram': suggestions.push(`Upgrading to 16GB RAM would reduce micro-stutters`); break;
+        case 'storage': suggestions.push(`Switching to an NVMe SSD would improve loading times`); break;
       }
     }
   }
-
   return suggestions.slice(0, 3);
 }
 
-// Helper to parse VRAM from a requirement string (e.g. "1GB GPU" -> 1024)
+/**
+ * Helper to parse VRAM from a requirement string (e.g. "1GB GPU" -> 1024)
+ */
 function parseVramFromStr(str: string): number {
+  if (!str) return 1024;
   const match = str.match(/(\d+)\s*(GB|MB)/i);
-  if (!match) return 1024; // Default 1GB
+  if (!match) return 1024; 
   let val = parseInt(match[1]);
   if (match[2].toUpperCase() === 'GB') val *= 1024;
   return val;
 }
 
-// Helper to score a set of requirements
+/**
+ * Extracts approximate cores and GHz from a CPU requirement string
+ */
+function parseCpuDetails(str: string): { cores: number; speed: number } {
+  const s = str.toLowerCase();
+  let cores = 4;
+  let speed = 3.0;
+
+  // Extract GHz
+  const ghzMatch = s.match(/(\d+\.?\d*)\s*ghz/);
+  if (ghzMatch) speed = parseFloat(ghzMatch[1]);
+
+  // Infer cores from common names
+  if (s.includes('i9') || s.includes('ryzen 9')) cores = 12;
+  else if (s.includes('i7') || s.includes('ryzen 7') || s.includes('8-core')) cores = 8;
+  else if (s.includes('i5') || s.includes('ryzen 5') || s.includes('6-core')) cores = 6;
+  else if (s.includes('quad') || s.includes('4-core')) cores = 4;
+  else if (s.includes('dual') || s.includes('2-core')) cores = 2;
+
+  return { cores, speed };
+}
+
+/**
+ * Helper to score a set of requirements - NO MAGIC NUMBERS
+ */
 function getRequirementScores(reqs: Game['requirements']) {
   const minVram = parseVramFromStr(reqs.minGpu);
   const recVram = reqs.recGpu ? parseVramFromStr(reqs.recGpu) : minVram * 1.5;
 
+  const minCpu = parseCpuDetails(reqs.minCpu);
+  const recCpu = reqs.recCpu ? parseCpuDetails(reqs.recCpu) : { cores: minCpu.cores + 2, speed: minCpu.speed + 0.5 };
+
   return {
     min: {
       gpu: scoreGpuRealistic(reqs.minGpu, minVram),
-      cpu: scoreCpuRealistic(reqs.minCpu, 4, 3.0),
+      cpu: scoreCpuRealistic(reqs.minCpu, minCpu.cores, minCpu.speed),
       ram: scoreRamRealistic(reqs.minRam * 1024 * 1024 * 1024),
       storage: scoreStorageRealistic('HDD')
     },
     rec: {
       gpu: reqs.recGpu ? scoreGpuRealistic(reqs.recGpu, recVram) : 0,
-      cpu: reqs.recCpu ? scoreCpuRealistic(reqs.recCpu, 6, 3.5) : 0,
+      cpu: reqs.recCpu ? scoreCpuRealistic(reqs.recCpu, recCpu.cores, recCpu.speed) : 0,
       ram: reqs.recRam ? scoreRamRealistic(reqs.recRam * 1024 * 1024 * 1024) : 0,
       storage: scoreStorageRealistic('SSD')
     }
   };
+}
+
+/**
+ * Determine bottleneck and suggestions
+ */
+function determineBottleneck(components: any): string | null {
+  const sorted = Object.entries(components).sort(([, a]: any, [, b]: any) => a.score - b.score);
+  return sorted[0][1].score < 70 ? sorted[0][0].toUpperCase() : null;
 }
 
 // Main compatibility check function
@@ -228,20 +308,22 @@ export function checkCompatibility(system: SystemInfo, game: Game): Compatibilit
     storage: scoreStorageRealistic(system.storage[0]?.type || 'HDD')
   };
 
-  // Step 2 — Get requirement scores
+  // Step 2 — Get requirement scores (Score vs. Score)
   const reqScores = getRequirementScores(requirements);
 
-  // Step 3 — Physical VRAM override (Direct comparison)
-  const reqMinVramMb = parseVramFromStr(requirements.minGpu);
-  const vramPasses = system.gpu.vram >= reqMinVramMb;
+  // Step 3 — Physical VRAM override (Direct GB comparison as requested)
+  // Converting MB to GB for the comparison
+  const userVramGb = system.gpu.vram / 1024;
+  const reqMinVramGb = parseVramFromStr(requirements.minGpu) / 1024;
+  const vramPasses = userVramGb >= reqMinVramGb;
 
-  // Step 4 — Composite Component Result
+  // Step 4 — Composite Component Result (Relative comparisons)
   const components = {
     cpu: {
       score: userScores.cpu,
       userHardware: `${system.cpu.manufacturer} ${system.cpu.brand}`,
       minRequired: requirements.minCpu,
-      recRequired: requirements.recCpu,
+      recRequired: requirements.recCpu || 'Not Specified',
       meetsMinimum: userScores.cpu >= reqScores.min.cpu,
       meetsRecommended: reqScores.rec.cpu > 0 && userScores.cpu >= reqScores.rec.cpu,
     },
@@ -249,27 +331,28 @@ export function checkCompatibility(system: SystemInfo, game: Game): Compatibilit
       score: userScores.gpu,
       userHardware: `${system.gpu.vendor} ${system.gpu.model}`,
       minRequired: requirements.minGpu,
-      recRequired: requirements.recGpu,
+      recRequired: requirements.recGpu || 'Not Specified',
       meetsMinimum: userScores.gpu >= reqScores.min.gpu && vramPasses,
       meetsRecommended: reqScores.rec.gpu > 0 && userScores.gpu >= reqScores.rec.gpu,
+      vramPasses, // Pass our direct GB check flag
     },
     ram: {
-      score: userScores.ram,
+      score: Math.round((userScores.ram / (reqScores.rec.ram || reqScores.min.ram * 1.5)) * 100),
       userHardware: `${(system.memory.total / (1024 ** 3)).toFixed(0)} GB`,
       minRequired: `${requirements.minRam} GB`,
       recRequired: requirements.recRam ? `${requirements.recRam} GB` : undefined,
-      meetsMinimum: (system.memory.total / (1024 ** 3)) >= requirements.minRam * 0.9,
-      meetsRecommended: requirements.recRam ? (system.memory.total / (1024 ** 3)) >= requirements.recRam * 0.95 : false,
+      meetsMinimum: (system.memory.total / (1024 ** 3)) >= (requirements.minRam - 0.1),
+      meetsRecommended: requirements.recRam ? (system.memory.total / (1024 ** 3)) >= (requirements.recRam - 0.1) : false,
     },
     storage: {
       score: userScores.storage,
       userHardware: system.storage[0] 
-        ? `${system.storage[0].type} - ${(system.storage[0].size / (1024 ** 3)).toFixed(0)} GB (${(system.storage[0].available / (1024 ** 3)).toFixed(0)} GB Free)`
+        ? `${system.storage[0].type} - ${(system.storage[0].size / (1024 ** 3)).toFixed(0)} GB`
         : 'HDD',
       minRequired: `${requirements.minStorage} GB`,
       recRequired: requirements.recStorage ? `${requirements.recStorage} GB` : undefined,
       meetsMinimum: userScores.storage >= reqScores.min.storage,
-      meetsRecommended: userScores.storage >= reqScores.rec.storage,
+      meetsRecommended: reqScores.rec.storage > 0 ? userScores.storage >= reqScores.rec.storage : true,
     },
   };
 
@@ -277,37 +360,37 @@ export function checkCompatibility(system: SystemInfo, game: Game): Compatibilit
   const meetsMinimum = Object.values(components).every(c => c.meetsMinimum);
   const meetsRecommended = Object.values(components).every(c => c.meetsRecommended);
   
-  const fps = estimateFpsRealistic(userScores.gpu, userScores.cpu, userScores.ram, userScores.storage);
-  const overallScore = Math.round((userScores.gpu * 0.55) + (userScores.cpu * 0.25) + (userScores.ram * 0.15) + (userScores.storage * 0.05));
+  const fps = estimateFpsRealistic(userScores, reqScores);
+  
+  // FIXED: Overall score is now a COMPATIBILITY RATING (0-100%)
+  const userC = (userScores.gpu * 0.55) + (userScores.cpu * 0.25) + (userScores.ram * 0.15) + (userScores.storage * 0.05);
+  const recC = reqScores.rec.gpu > 0 ? (reqScores.rec.gpu * 0.55) + (reqScores.rec.cpu * 0.25) + (reqScores.rec.ram * 0.15) + (reqScores.rec.storage * 0.05) : (reqScores.min.gpu * 1.5 * 0.55) + (reqScores.min.cpu * 1.3 * 0.25) + (reqScores.min.ram * 1.5 * 0.15) + (reqScores.min.storage * 0.05);
+
+  const overallScore = Math.min(100, Math.round((userC / recC) * 100));
 
   let verdict: Verdict;
-  if (meetsRecommended) {
+  if (meetsRecommended && overallScore >= 90) {
+    verdict = 'exceeds';
+  } else if (meetsRecommended) {
     verdict = 'recommended';
   } else if (meetsMinimum) {
     verdict = 'minimum';
-  } else if (system.gpu.model.toLowerCase().includes('integrated') || system.gpu.model.toLowerCase().includes('graphics')) {
-    verdict = 'cannot-run'; // Only for true integrated/missing GPU cases
-  } else {
-    verdict = 'poor-experience'; // Acts as "below minimum" for dedicated hardware
-  }
-
-  // Adjust "poor-experience" if FPS is high but requirements failed (unlikely but possible)
-  const lowFpsVal = parseInt(fps.low);
-  if (verdict === 'minimum' && lowFpsVal < 30) {
+  } else if (overallScore >= 40) {
     verdict = 'poor-experience';
+  } else if (overallScore >= 20) {
+    verdict = 'below-minimum';
+  } else {
+    verdict = 'cannot-run';
   }
 
-  // Determine bottleneck
-  const sorted = Object.entries(components).sort(([, a], [, b]) => a.score - b.score);
-  const bottleneck = sorted[0][0].toUpperCase();
-
+  const bottleneck = determineBottleneck(components);
   const suggestions = generateSuggestions(components);
 
   return {
     overallScore,
     verdict,
     components,
-    bottleneck: overallScore < 70 ? bottleneck : null,
+    bottleneck: overallScore < 75 ? bottleneck : null,
     suggestions,
     fps,
   };
@@ -316,6 +399,7 @@ export function checkCompatibility(system: SystemInfo, game: Game): Compatibilit
 export function getVerdictColor(verdict: Verdict): string {
   switch (verdict) {
     case 'cannot-run': return 'text-red-500';
+    case 'below-minimum': return 'text-orange-500';
     case 'poor-experience': return 'text-orange-500';
     case 'minimum': return 'text-yellow-500';
     case 'recommended': return 'text-green-500';
@@ -326,6 +410,7 @@ export function getVerdictColor(verdict: Verdict): string {
 export function getVerdictLabel(verdict: Verdict): string {
   switch (verdict) {
     case 'cannot-run': return 'Cannot Run';
+    case 'below-minimum': return 'Below Minimum';
     case 'poor-experience': return 'Poor Experience';
     case 'minimum': return 'Meets Minimum';
     case 'recommended': return 'Meets Recommended';

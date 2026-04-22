@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { parseSteamRequirements } from '@/lib/steam-utils';
 import type { Game } from '@/lib/types';
 
-// Required for Next.js static export (Electron build)
-export const dynamic = 'force-static';
+// Required for dynamic data fetching in Next.js
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -14,7 +14,12 @@ export async function GET(request: Request) {
   }
 
   try {
-    const response = await fetch(`https://store.steampowered.com/api/appdetails?appids=${appId}&l=english`);
+    const response = await fetch(`https://store.steampowered.com/api/appdetails?appids=${appId}&l=english`, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/json'
+      }
+    });
     
     if (!response.ok) {
       throw new Error(`Steam Details API failed for ${appId}`);

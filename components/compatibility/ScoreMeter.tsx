@@ -90,11 +90,9 @@ export function ScoreMeter({
             className={cn(scoreColorClass, animated && 'transition-all duration-300')}
           />
         </svg>
-        {/* Score text */}
+        {/* Score text removed by user request */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className={cn(config.fontSize, 'font-bold font-mono', scoreColorClass.replace('stroke-', 'text-').replace('score-', 'text-'))}>
-            {displayScore}
-          </span>
+           {/* Ring only view */}
         </div>
       </div>
       {showLabel && label && (

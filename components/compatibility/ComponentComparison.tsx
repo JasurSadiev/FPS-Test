@@ -40,8 +40,12 @@ export function ComponentComparison({ label, icon, score }: ComponentComparisonP
           </div>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-black italic tracking-tighter text-foreground group-hover:text-primary transition-colors">
-            {score.score}%
+          <div className="flex items-center gap-1">
+             {score.meetsMinimum ? (
+               <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
+             ) : (
+               <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
+             )}
           </div>
         </div>
       </div>
@@ -103,6 +107,25 @@ export function ComponentComparison({ label, icon, score }: ComponentComparisonP
             </div>
           )}
         </div>
+
+        {/* VRAM Override Badge (Special for GPU) */}
+        {label === "GPU" && score.vramPasses !== undefined && (
+          <div className={cn(
+            "flex items-center justify-between p-3 rounded-xl border animate-in fade-in duration-700",
+            score.vramPasses 
+              ? "bg-green-500/5 border-green-500/20 text-green-500" 
+              : "bg-red-500/5 border-red-500/20 text-red-500"
+          )}>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">Physical VRAM Check</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-bold uppercase">{score.vramPasses ? 'Passed' : 'Insufficient'}</span>
+              {score.vramPasses ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

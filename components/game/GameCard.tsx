@@ -81,14 +81,9 @@ export function GameCard({
           <h3 className="font-semibold text-base truncate mb-2">{game.name}</h3>
           
           {compatibility ? (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <HardDrive className="w-3 h-3 text-primary/60" />
-                <span>{game.requirements.minStorage} GB</span>
-              </div>
-              <div className="text-2xl font-black font-mono text-primary italic">
-                {compatibility.overallScore}%
-              </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <HardDrive className="w-3 h-3 text-primary/60" />
+              <span>{game.requirements.minStorage} GB</span>
             </div>
           ) : (
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -158,10 +153,7 @@ export function GameCard({
             </div>
             {compatibility && (
               <div className="text-right">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-1">SCORE</p>
-                <div className="text-5xl font-black italic text-primary">
-                  {compatibility.overallScore}%
-                </div>
+                <VerdictBadge verdict={compatibility.verdict} size="lg" />
               </div>
             )}
           </div>

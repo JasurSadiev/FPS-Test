@@ -275,7 +275,12 @@ try {
 // Steam Search Proxy
 ipcMain.handle('steam-search', async (_, query) => {
   try {
-    const response = await fetch(`https://steamcommunity.com/actions/SearchApps/${encodeURIComponent(query)}`);
+    const response = await fetch(`https://steamcommunity.com/actions/SearchApps/${encodeURIComponent(query)}`, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/json'
+      }
+    });
     if (!response.ok) throw new Error('Steam API failed');
     return await response.json();
   } catch (error) {
@@ -358,7 +363,12 @@ function parseSteamRequirements(requirementsHtml) {
 // Steam Details Proxy
 ipcMain.handle('steam-details', async (_, appId) => {
   try {
-    const response = await fetch(`https://store.steampowered.com/api/appdetails?appids=${appId}&l=english`);
+    const response = await fetch(`https://store.steampowered.com/api/appdetails?appids=${appId}&l=english`, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/json'
+      }
+    });
     if (!response.ok) throw new Error(`Steam Details API failed for ${appId}`);
     
     const data = await response.json();

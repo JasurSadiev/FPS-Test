@@ -17,6 +17,12 @@ const verdictStyles: Record<Verdict, { bg: string; text: string; border: string;
     border: 'border-red-500/30',
     icon: XCircle,
   },
+  'below-minimum': {
+    bg: 'bg-orange-500/10',
+    text: 'text-orange-500',
+    border: 'border-orange-500/30',
+    icon: AlertCircle,
+  },
   'poor-experience': {
     bg: 'bg-orange-500/10',
     text: 'text-orange-500',
