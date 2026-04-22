@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 
 export function DownloadAppBanner() {
   const handleDownload = () => {
-    window.location.href = 'https://github.com/JasurSadiev/FPS-Test/releases/download/v2.0.0/FPS.Test.Setup.1.0.0.exe';
+    window.location.href = 'https://github.com/JasurSadiev/FPS-Test/releases/download/v2.5.0/FPS.Test.Setup.2.5.0.exe';
   };
 
   return (

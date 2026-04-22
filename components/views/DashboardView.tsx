@@ -75,7 +75,7 @@ export function DashboardView({ systemInfo, games, library, onToggleLibrary, onD
                 size="lg" 
                 variant="outline" 
                 onClick={() => {
-                  window.location.href = 'https://github.com/JasurSadiev/FPS-Test/releases/download/v2.0.0/FPS.Test.Setup.1.0.0.exe';
+                  window.location.href = 'https://github.com/JasurSadiev/FPS-Test/releases/download/v2.5.0/FPS.Test.Setup.2.5.0.exe';
                 }}
                 className="h-16 px-8 text-xl font-bold italic uppercase hover:bg-white/5 transition-colors group gap-3"
               >
